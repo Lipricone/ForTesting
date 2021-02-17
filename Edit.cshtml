@@ -1,0 +1,170 @@
+﻿@model LaboratoryISCore.Models.Analysis
+
+
+@{ ViewData["Title"] = "Edit"; }
+
+<h1>Редакирование</h1>
+
+<h4>анализа</h4>
+<hr />
+<div class="row">
+    <div class="col-md-12">
+        <form asp-action="Edit" id="myForm">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="AnalysisName" class="control-label"></label>
+                <input asp-for="AnalysisName" id="AnalysisName" class="form-control" />
+                <span asp-validation-for="AnalysisName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="AnalysisGroup" class="control-label"></label>
+                <select asp-for="AnalysisGroupId" class="form-control" asp-items="ViewBag.AnalysisGroupId"></select>
+            </div>
+            <table style="width: 100%">
+                <tbody id="analysis_table">
+                    @for (int i = 0; i < Model.Parameters.Count; i++)
+                    {
+        <tr class="parameters" id="parameters_@i">
+            <td>
+                <div class="form-group">
+                    <label asp-for="Parameters[i].ParameterName" class="control-label parameter_name_label"></label>
+                    <input asp-for="Parameters[i].ParameterName" class="form-control parameter_name_input" />
+                    <span asp-validation-for="Parameters[i].ParameterName" class="text-danger parameter_name_span"></span>
+                </div>
+            </td>
+            <td>
+                <div class="form-group">
+                    <label asp-for="Parameters[i].Norm" class="control-label norm_label"></label>
+                    <input asp-for="Parameters[i].Norm" class="form-control norm_input" />
+                    <span asp-validation-for="Parameters[i].Norm" class="text-danger norm_span"></span>
+                </div>
+            </td>
+            <td>
+                <div class="form-group" id="sections">
+                    <label asp-for="Parameters[i].ParameterType" class="control-label parameter_type_id_label"></label>
+                    <select asp-for="Parameters[i].ParameterTypeId" class="form-control parameter_type_id_input" asp-items="ViewBag.ParameterTypeId" onchange="FuncOrder(this.value, this.id)"></select>
+                </div>
+            </td>
+            <td>
+                <div class="form-group template" id="template_0" style="display:none">
+                    <label asp-for="Parameters[i].Template" class="control-label template_id_label"></label>
+                    <select asp-for="Parameters[i].TemplateId" class="form-control template_id_input" asp-items="ViewBag.TemplateId">
+                        <option value=""></option>
+                    </select>
+
+                </div>
+            </td>
+            <td>
+                <div class="form-group">
+                    <label asp-for="Parameters[i].ForGender" class="control-label for_gender_label"></label>
+                    <select asp-for="Parameters[i].ForGender" class="form-control for_gender_input" asp-items="@Html.GetEnumSelectList<ForGender>()"></select>
+                    <span asp-validation-for="Parameters[i].ForGender" class="text-danger for_gender_span"></span>
+                </div>
+            </td>
+            <td>
+                <div class="form-group">
+                    @*<input type="button" id="buttonDeleteField_@i" onclick="pleaseRemoveField(this.id)" value="Удалить" class="btn btn-primary parameter_name_button" />*@
+                    @*<a id="buttonDeleteField_@i"><i class="feather icon-trash parameter_name_button" onclick="pleaseRemoveField(this.id)" style="color: red; font-size: 35px; text-shadow: 2px 3px 3px #ff0000;"></i></a>*@
+                    <a id="buttonDeleteField_@i"><i class="ml-2 fa fa-trash fa-2x parameter_name_button" onclick="pleaseRemoveField(this.id)" style="color: red;  "></i></a>
+                </div>
+            </td>
+
+        </tr>
+}
+                </tbody>
+            </table>
+            <div class="form-group">
+                <input type="submit" value="Сохранить" id="btnSearch" class="btn btn-primary" />
+            </div>
+        </form>
+        <div class="form-group">
+            <input type="button" id="addNewField" value="Добавить параметры" class="btn btn-primary" />
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script type="text/javascript">
+        $(function () {
+            $("#btnSearch").click(function () {
+                $.ajax({
+                    type: "POST",
+                    url: "/Analyses/Check",
+                    data: { "AnalysisName": $("#AnalysisName").val() },
+                });
+            });
+    </script>
+    <script type="text/javascript">
+
+        var index = 1;
+        document.querySelector('#addNewField').addEventListener('click', function () {
+
+
+            var clone = $('#parameters_0').clone().attr('id', 'parameters' + index);
+
+            clone.find(".parameter_name_label").attr('for', 'Parameters_' + index + '__ParameterName');
+            clone.find(".parameter_name_input").attr('id', 'Parameters_' + index + '__ParameterName');
+            clone.find(".parameter_name_input").attr('name', 'Parameters[' + index + '].ParameterName');
+            clone.find(".parameter_name_span").attr('data-valmsg-for', 'Parameters_' + index + '__ParameterName');
+
+            clone.find(".norm_label").attr('for', 'Parameters_' + index + '__Norm');
+            clone.find(".norm_input").attr('id', 'Parameters_' + index + '__Norm');
+            clone.find(".norm_input").attr('name', 'Parameters[' + index + '].Norm');
+            clone.find(".norm_span").attr('data-valmsg-for', 'Parameters_' + index + '__Norm');
+
+            clone.find(".parameter_type_id_label").attr('for', 'Parameters_' + index + '__ParameterTypeId');
+            clone.find(".parameter_type_id_input").attr('id', index);
+            clone.find(".parameter_type_id_input").attr('name', 'Parameters[' + index + '].ParameterTypeId');
+
+            clone.find(".template").attr('id', 'template_' + index);
+            clone.find(".template").attr('style', 'display:none')
+            clone.find(".template_id_label").attr('for', 'Parameters_' + index + '__TemplateId');
+            clone.find(".template_id_input").attr('id', 'Parameters_' + index + '__TemplateId');
+            clone.find(".template_id_input").attr('name', 'Parameters[' + index + '].TemplateId');
+
+            clone.find(".for_gender_label").attr('for', 'Parameters_' + index + '__ForGender');
+            clone.find(".for_gender_input").attr('id', 'Parameters_' + index + '__ForGender');
+            clone.find(".for_gender_input").attr('name', 'Parameters[' + index + '].ForGender');
+
+            clone.find(".parameter_name_button").attr('id', 'buttonDeleteField_' + index);
+
+            let table = $('#analysis_table');
+            index++;
+            table.append(clone);
+        })
+        function FuncOrder(id, i) {
+            if (i == 'Parameters_0__ParameterTypeId') {
+                if (id == "10004") {
+                    document.getElementById("template_0").style.display = "block";
+                } else {
+                    document.getElementById("template_0").style.display = "none";
+                }
+            } else {
+                if (id == "10004") {
+                    document.getElementById("template_" + i).style.display = "block";
+                } else {
+                    document.getElementById("template_" + i).style.display = "none";
+                }
+            }
+
+
+
+        }
+
+        function pleaseRemoveField(id) {
+
+            if (id != "buttonDeleteField_0") {
+                $('#' + id).parents('tr').remove();
+            }
+        }
+
+
+
+
+    </script>
+}
+<div>
+    <a asp-action="Index">Назад в список</a>
+</div>
